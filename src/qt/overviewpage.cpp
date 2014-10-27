@@ -209,8 +209,8 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
     QString market = "BTC_HYP";
     QString str;
     QString currentRate = OverviewPage::getCurrentRate(market);
-//    double currentValue = currentRate.toDouble() * currentBalance; 
-    double currentValue = 12345678;
+    //double currentValue = currentRate.toDouble() * currentBalance; 
+    double currentValue = 0.00005 * balance;
     ui->labelValue->setText(BitcoinUnits::formatWithUnit(REAL_BTC_UNIT, currentValue)); 
 
 
