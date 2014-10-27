@@ -1,17 +1,26 @@
-#include "overviewpage.h"
-#include "ui_overviewpage.h"
-
-#include "walletmodel.h"
+#include "askpassphrasedialog.h"
 #include "bitcoinunits.h"
+#include "guiconstants.h"
+#include "guiutil.h"
 #include "optionsmodel.h"
+#include "overviewpage.h"
 #include "transactiontablemodel.h"
 #include "transactionfilterproxy.h"
-#include "guiutil.h"
-#include "guiconstants.h"
-#include "askpassphrasedialog.h"
+#include "ui_overviewpage.h"
+#include "walletmodel.h"
 
 #include <QAbstractItemDelegate>
+#include <QDebug>
+#include <QJsonValue>
+#include <QJsonDocument>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QPainter>
+#include <QString>
+#include <QUrl>
+#include <QUrlQuery>
+
 
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 6
@@ -133,14 +142,77 @@ OverviewPage::~OverviewPage()
     delete ui;
 }
 
+QString OverviewPage::sendRequest(QString url)
+{
+    QString Response = "";
+
+    // create custom temporary event loop on stack
+    QEventLoop eventLoop;
+
+    // "quit()" the event-loop, when the network request "finished()"
+    QNetworkAccessManager mgr;
+    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+    // the HTTP request
+    QNetworkRequest req = QNetworkRequest(QUrl(url));
+
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QNetworkReply *reply = mgr.get(req);
+    eventLoop.exec(); // blocks stack until "finished()" has been called
+
+    if (reply->error() == QNetworkReply::NoError) {
+        //success
+        Response = reply->readAll();
+        delete reply;
+    }
+    else{
+        //failure
+        qDebug() << "Failure" <<reply->errorString();
+        Response = "Error";
+      //QMessageBox::information(this,"Error",reply->errorString());
+        delete reply;
+        }
+
+     return Response;
+}
+
+QJsonObject OverviewPage::GetResultObjectFromJSONObject(QString response, QString market)
+{
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(response.toUtf8());          //get json from str.
+    QJsonObject  ResponseObject = jsonResponse.object();                              //get json obj
+    QJsonObject  ResultObject   = ResponseObject.value(QString(market)).toObject(); //get result object
+
+  return ResultObject;
+}
+
+QString OverviewPage::getCurrentRate(QString market)
+{
+    QString URL = "https://poloniex.com/public?command=returnTicker";    
+    QString Tickers = sendRequest(URL);
+    QJsonObject tickerObject = GetResultObjectFromJSONObject(Tickers, market);
+    QString Response = tickerObject["last"].toString();
+
+    return Response;
+}
+
 void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance)
 {
     int unit = model->getOptionsModel()->getDisplayUnit();
+    int REAL_BTC_UNIT = 3;
     currentBalance = balance;
     currentStake = stake;
     currentUnconfirmedBalance = unconfirmedBalance;
     currentImmatureBalance = immatureBalance;
     ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, balance));
+
+    QString market = "BTC_HYP";
+    QString str;
+    QString currentRate = OverviewPage::getCurrentRate(market);
+    double currentValue = currentRate.toDouble() * currentBalance; 
+    ui->labelValue->setText(BitcoinUnits::formatWithUnit(REAL_BTC_UNIT, currentValue)); 
+
+
     ui->labelStake->setText(BitcoinUnits::formatWithUnit(unit, stake));
     ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, unconfirmedBalance));
     ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, immatureBalance));

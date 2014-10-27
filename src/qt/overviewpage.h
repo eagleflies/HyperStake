@@ -1,6 +1,10 @@
 #ifndef OVERVIEWPAGE_H
 #define OVERVIEWPAGE_H
 
+#include <QDialog>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QObject>
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -29,6 +33,11 @@ public:
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance);
     void setNumTransactions(int count);
+    QString getCurrentRate(QString market);
+    QString sendRequest(QString url);
+
+//    QString OverviewPage::sendRequest(QString url)
+
 
 signals:
     void transactionClicked(const QModelIndex &index);
@@ -41,12 +50,14 @@ private:
     qint64 currentUnconfirmedBalance;
     qint64 currentImmatureBalance;
 
+
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
 
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
+    QJsonObject GetResultObjectFromJSONObject(QString response, QString market);
 };
 
 #endif // OVERVIEWPAGE_H

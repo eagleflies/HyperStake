@@ -24,6 +24,7 @@ bool BitcoinUnits::valid(int unit)
     case BTC:
     case mBTC:
     case uBTC:
+    case realBTC:
         return true;
     default:
         return false;
@@ -37,6 +38,7 @@ QString BitcoinUnits::name(int unit)
     case BTC: return QString("HYP");
     case mBTC: return QString("mHYP");
     case uBTC: return QString::fromUtf8("μHYP");
+    case realBTC: return QString("BTC");
     default: return QString("???");
     }
 }
@@ -48,6 +50,7 @@ QString BitcoinUnits::description(int unit)
     case BTC: return QString("HYP");
     case mBTC: return QString("Milli-HYP (1 / 1,000)");
     case uBTC: return QString("Micro-HYP (1 / 1,000,000)");
+    case realBTC: return QString("BTC");
     default: return QString("???");
     }
 }
@@ -59,6 +62,7 @@ qint64 BitcoinUnits::factor(int unit)
     case BTC:  return 1000000;
     case mBTC: return 1000;
     case uBTC: return 1;
+    case realBTC: return 1000000;
     default:   return 1000000;
     }
 }
@@ -70,6 +74,7 @@ int BitcoinUnits::amountDigits(int unit)
     case BTC: return 8; // 21,000,000 (# digits, without commas)
     case mBTC: return 11; // 21,000,000,000
     case uBTC: return 14; // 21,000,000,000,000
+    case realBTC: return 8; // 21,000,000 (# digits, without commas)
     default: return 0;
     }
 }
@@ -81,6 +86,7 @@ int BitcoinUnits::decimals(int unit)
     case BTC: return 6;
     case mBTC: return 3;
     case uBTC: return 0;
+    case realBTC: return 6;
     default: return 0;
     }
 }

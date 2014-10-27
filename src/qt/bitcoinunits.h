@@ -19,7 +19,8 @@ public:
     {
         BTC,
         mBTC,
-        uBTC
+        uBTC,
+        realBTC
     };
 
     //! @name Static API
