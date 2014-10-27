@@ -189,9 +189,12 @@ QJsonObject OverviewPage::GetResultObjectFromJSONObject(QString response, QStrin
 QString OverviewPage::getCurrentRate(QString market)
 {
     QString URL = "https://poloniex.com/public?command=returnTicker";    
+    qDebug() << URL; 
+    qDebug() << market;
     QString Tickers = sendRequest(URL);
     QJsonObject tickerObject = GetResultObjectFromJSONObject(Tickers, market);
     QString Response = tickerObject["last"].toString();
+    qDebug() << Response;
 
     return Response;
 }
@@ -209,8 +212,7 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
     QString market = "BTC_HYP";
     QString str;
     QString currentRate = OverviewPage::getCurrentRate(market);
-    //double currentValue = currentRate.toDouble() * currentBalance; 
-    double currentValue = 0.00005 * balance;
+    double currentValue = currentRate.toDouble() * currentBalance; 
     ui->labelValue->setText(BitcoinUnits::formatWithUnit(REAL_BTC_UNIT, currentValue)); 
 
 
