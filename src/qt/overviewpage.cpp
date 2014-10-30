@@ -170,7 +170,8 @@ QString OverviewPage::sendRequest(QString url)
         //failure
         qDebug() << "Failure" <<reply->errorString();
         Response = "Error";
-      //QMessageBox::information(this,"Error",reply->errorString());
+// eagle
+        QMessageBox::information(this,"Error",reply->errorString());
         delete reply;
         }
 
